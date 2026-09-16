@@ -1,0 +1,50 @@
+
+return {
+  name = 'alabaster',
+  roles = function(p)
+    return {
+      comment = { fg = p.dark and p.yellow1 or p.red1 },
+      string = { fg = p.green1 },
+      string_escape = { fg = p.text2 },
+      string_regex = { fg = p.green1 },
+      string_url = { fg = p.green1 },
+      number = { fg = p.magenta1 },
+      constant = { fg = p.magenta1 },
+      constant_builtin = { fg = p.magenta1 },
+      decorator = { fg = p.text1 },
+      keyword = { fg = p.text1 },
+      keyword_return = { fg = p.text1 },
+      keyword_operator = { fg = p.text1 },
+      conditional = { fg = p.text1 },
+      preproc = { fg = p.text1 },
+      type = { fg = p.text1 },
+      type_builtin = { fg = p.text1 },
+      constructor = { fg = p.blue1 },
+      identifier = { fg = p.text1 },
+      func = { fg = p.blue1 },
+      func_builtin = { fg = p.text1 },
+      func_macro = { fg = p.text1 },
+      variable = { fg = p.text1 },
+      variable_builtin = { fg = p.text1 },
+      parameter = { fg = p.text1 },
+      member = { fg = p.text1 },
+      module = { fg = p.text1 },
+      operator = { fg = p.text2 },
+      punctuation = { fg = p.text2 },
+      punctuation_special = { fg = p.text2 },
+      delimiter = { fg = p.text2 },
+      special = { fg = p.text1 },
+      label = { fg = p.text1 },
+      tag = { fg = p.blue1 },
+      tag_attribute = { fg = p.text1 },
+      tag_delimiter = { fg = p.text2 },
+      reference = { fg = p.blue1 },
+    }
+  end,
+  highlights = function(p)
+    return {
+      ['@function.call'] = { fg = p.text1 },
+      ['@function.method.call'] = { fg = p.text1 },
+    }
+  end,
+}

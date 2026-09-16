@@ -1,0 +1,26 @@
+return function(palette)
+  return {
+    OilHidden = { fg = palette.subtext1 },
+    OilDir = { link = 'Directory' },
+    OilDirHidden = { link = 'OilHidden' },
+    OilSocket = { link = 'Keyword' },
+    OilSocketHidden = { link = 'OilHidden' },
+    OilLinkHidden = { link = 'OilHidden' },
+    OilOrphanLinkHidden = { link = 'OilLinkHidden' },
+    OilLinkTarget = { fg = palette.subtext1 },
+    OilOrphanLinkTarget = { link = 'DiagnosticError' },
+    OilLinkTargetHidden = { link = 'OilHidden' },
+    OilOrphanLinkTargetHidden = { link = 'OilOrphanLinkTarget' },
+    OilFileHidden = { link = 'OilHidden' },
+    OilCreate = { link = 'DiagnosticInfo' },
+    OilDelete = { link = 'DiagnosticError' },
+    OilMove = { link = 'DiagnosticWarn' },
+    OilCopy = { link = 'DiagnosticHint' },
+    OilChange = { link = 'Special' },
+    OilRestore = { link = 'OilCreate' },
+    OilPurge = { link = 'OilDelete' },
+    OilTrash = { link = 'OilDelete' },
+    OilTrashSourcePath = { fg = palette.subtext1 },
+    OilDirIcon = { fg = palette.blue1 },
+  }
+end

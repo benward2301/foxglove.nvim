@@ -1,0 +1,25 @@
+return function(palette)
+  return {
+    NeoTreeModified = { fg = palette.subtext1 },
+    NeoTreeGitUntracked = { fg = palette.magenta2 },
+    NeoTreeGitIgnored = { fg = palette.subtext1 },
+    NeoTreeGitConflict = { fg = palette.orange1, italic = true },
+    NeoTreeGitDeleted = { fg = palette.red1 },
+    NeoTreeGitAdded = { fg = palette.green1 },
+    NeoTreeGitModified = { fg = palette.yellow1 },
+    NeoTreeGitUnstaged = { fg = palette.yellow1 },
+    NeoTreeDimText = { link = 'Conceal' },
+    NeoTreeMessage = { fg = palette.subtext1 },
+    NeoTreeFileNameOpened = { fg = palette.text1 },
+    NeoTreeFileName = { fg = palette.text1 },
+    NeoTreeSymbolicLinkTarget = { fg = palette.cyan1 },
+    NeoTreeDotfile = { fg = palette.blue2 },
+    NeoTreeDirectoryName = { fg = palette.blue1 },
+    NeoTreeDirectoryIcon = { fg = palette.blue1 },
+    NeoTreeIndentMarker = { fg = palette.base3 },
+    NeoTreeRootName = { fg = palette.blue1 },
+    NeoTreeTabInactive = { bg = palette.base1 },
+    NeoTreeTitleBar = { bg = palette.base0, fg = palette.text2 },
+    NeoTreeFloatBorder = { bg = palette.base0, fg = palette.base0 },
+  }
+end
