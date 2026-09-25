@@ -65,26 +65,24 @@ function validate_declared(raw)
       tostring(raw.name), table.concat(parts, ', and ')), 0)
   end
 
-  local base_l, subtext_l, text_l =
-    cl.lightness(raw.base), cl.lightness(raw.subtext), cl.lightness(raw.text)
-  local lo, hi = math.min(base_l, text_l), math.max(base_l, text_l)
-  if subtext_l < lo or subtext_l > hi then
-    error(("foxglove: palette '%s' has a subtext that doesn't sit between base and text " ..
-      '(for an accented comment colour, override the comment role in the spec instead)')
-      :format(tostring(raw.name)), 0)
+  local min_span = MIN_BASE_SEPARATION + MIN_TEXT_SEPARATION
+  if math.abs(cl.lightness(raw.text) - cl.lightness(raw.base)) < min_span then
+    error(("foxglove: palette '%s' has a text too close to base " ..
+      '(needs at least %d lightness units of separation to fit a subtext between them)')
+      :format(tostring(raw.name), min_span), 0)
   end
+end
 
-  if math.abs(subtext_l - base_l) < MIN_BASE_SEPARATION then
-    error(("foxglove: palette '%s' has a subtext too close to base " ..
-      '(needs at least %d lightness units of separation for the base ramp to stay legible)')
-      :format(tostring(raw.name), MIN_BASE_SEPARATION), 0)
+local function clamp_subtext(raw)
+  local base_l, text_l = cl.lightness(raw.base), cl.lightness(raw.text)
+  local sign = base_l < text_l and 1 or -1
+  local span = (text_l - base_l) * sign
+  local gap = (cl.lightness(raw.subtext) - base_l) * sign
+  local clamped = math.min(math.max(gap, MIN_BASE_SEPARATION), span - MIN_TEXT_SEPARATION)
+  if clamped == gap then
+    return raw.subtext
   end
-
-  if math.abs(text_l - subtext_l) < MIN_TEXT_SEPARATION then
-    error(("foxglove: palette '%s' has a subtext too close to text " ..
-      '(needs at least %d lightness units of separation for a comment to read as one)')
-      :format(tostring(raw.name), MIN_TEXT_SEPARATION), 0)
-  end
+  return cl.with_lightness(raw.subtext, base_l + clamped * sign)
 end
 
 function declared(raw)
@@ -92,6 +90,7 @@ function declared(raw)
   for _, slot in ipairs(DECLARED) do
     out[slot] = cl.hex(raw[slot])
   end
+  out.subtext = clamp_subtext(out)
   return out
 end
 
