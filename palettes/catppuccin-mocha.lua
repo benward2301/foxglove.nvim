@@ -1,7 +1,7 @@
 return {
   name = 'catppuccin-mocha',
   base = '#1e1e2e',
-  subtext = '#9399b2',
+  subtext = '#7f849c',
   text = '#cdd6f4',
   red = '#f38ba8',
   green = '#a6e3a1',

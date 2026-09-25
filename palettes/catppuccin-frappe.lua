@@ -1,7 +1,7 @@
 return {
   name = 'catppuccin-frappe',
   base = '#303446',
-  subtext = '#949cbb',
+  subtext = '#838ba7',
   text = '#c6d0f5',
   red = '#e78284',
   green = '#a6d189',

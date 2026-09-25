@@ -1,7 +1,7 @@
 return {
   name = 'catppuccin-latte',
   base = '#eff1f5',
-  subtext = '#7c7f93',
+  subtext = '#8c8fa1',
   text = '#4c4f69',
   red = '#d20f39',
   green = '#40a02b',

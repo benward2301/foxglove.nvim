@@ -1,7 +1,7 @@
 return {
   name = 'catppuccin-macchiato',
   base = '#24273a',
-  subtext = '#939ab7',
+  subtext = '#8087a2',
   text = '#cad3f5',
   red = '#ed8796',
   green = '#a6da95',
