@@ -179,6 +179,8 @@ local function build(palette, roles)
     ['Identifier'] = hl(roles.identifier),
     ['@function'] = { link = 'Function' },
     ['@function.method'] = { link = 'Function' },
+    ['@function.call'] = hl(roles.func_call),
+    ['@function.method.call'] = { link = '@function.call' },
     ['@function.builtin'] = hl(roles.func_builtin),
     ['@function.macro'] = hl(roles.func_macro),
     ['Function'] = hl(roles.func),

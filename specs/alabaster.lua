@@ -22,6 +22,7 @@ return {
       constructor = { fg = p.blue1 },
       identifier = { fg = p.text1 },
       func = { fg = p.blue1 },
+      func_call = { fg = p.text1 },
       func_builtin = { fg = p.text1 },
       func_macro = { fg = p.text1 },
       variable = { fg = p.text1 },
@@ -39,12 +40,6 @@ return {
       tag_attribute = { fg = p.text1 },
       tag_delimiter = { fg = p.text2 },
       reference = { fg = p.blue1 },
-    }
-  end,
-  highlights = function(p)
-    return {
-      ['@function.call'] = { fg = p.text1 },
-      ['@function.method.call'] = { fg = p.text1 },
     }
   end,
 }

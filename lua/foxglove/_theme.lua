@@ -209,7 +209,6 @@ function compose(target)
   local groups = build(palette, roles)
   local touched = plain and changed_groups(plain, groups) or {}
 
-  overlay(groups, touched, specs.highlights(target.spec, palette, roles))
   overlay(groups, touched, overridden_highlights(palette, roles))
 
   return { palette = palette, roles = roles, groups = groups, touched = touched }
