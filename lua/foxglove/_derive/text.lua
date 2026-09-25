@@ -8,7 +8,6 @@ local function subtext_ramp(hex, sign, step, lo, hi)
   return {
     [0] = to(L + step * sign),
     [1] = hex,
-    [2] = to(L - step * sign),
   }
 end
 

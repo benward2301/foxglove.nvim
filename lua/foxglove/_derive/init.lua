@@ -20,7 +20,7 @@ local function derive(raw)
 
   local text = text_ramp(raw, axis)
   for i = 0, 2 do palette['text' .. i] = text.text[i] end
-  for i = 0, 2 do palette['subtext' .. i] = text.subtext[i] end
+  for i = 0, 1 do palette['subtext' .. i] = text.subtext[i] end
 
   for _, name in ipairs(ACCENTS) do
     local accent = accent_ramp(raw, axis, name, base.lightness)

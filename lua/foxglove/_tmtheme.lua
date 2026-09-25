@@ -34,7 +34,7 @@ GLOBALS = {
   { 'lineHighlight', 'base2' },
   { 'selection', 'base3' },
   { 'gutter', 'base1' },
-  { 'gutterForeground', 'subtext2' },
+  { 'gutterForeground', 'subtext1' },
 }
 
 SCOPES = {

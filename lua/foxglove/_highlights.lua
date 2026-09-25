@@ -13,7 +13,7 @@ local function build(palette, roles)
     ['CurSearch'] = { link = 'IncSearch' },
     ['MoreMsg'] = { fg = palette.blue1, bold = true },
     ['ModeMsg'] = { fg = palette.yellow1, bold = true },
-    ['LineNr'] = { fg = palette.subtext2 },
+    ['LineNr'] = { fg = palette.subtext1 },
     ['LineNrAbove'] = { link = 'LineNr' },
     ['LineNrBelow'] = { link = 'LineNr' },
     ['CursorLineNr'] = { fg = palette.text2 },
