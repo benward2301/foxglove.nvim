@@ -3,7 +3,7 @@ return {
   name = 'catppuccin',
   roles = function(p)
     return {
-      comment = { fg = p.subtext1, italic = true },
+      comment = { fg = p.subtext0, italic = true },
       string = { fg = p.green1 },
       string_escape = { fg = p.magenta0 },
       string_regex = { fg = p.magenta0 },
