@@ -64,10 +64,22 @@ local function restorer()
   end
 end
 
+local function lead_with(names, current)
+  for i, name in ipairs(names) do
+    if name == current then
+      table.remove(names, i)
+      table.insert(names, 1, name)
+      break
+    end
+  end
+  return names
+end
+
 local function build_axes()
   local current = theme.current or {}
   return {
-    { name = 'palettes', label = 'Palettes', key = 'palette', items = palettes.list(), original = current.palette,
+    { name = 'palettes', label = 'Palettes', key = 'palette',
+      items = lead_with(palettes.list(), current.palette), original = current.palette,
       sep = ' ',
       cells = function(name)
         local ok, raw = pcall(palettes.resolve, name)
@@ -78,7 +90,8 @@ local function build_axes()
         end
         return out
       end },
-    { name = 'specs', label = 'Specs', key = 'spec', items = specs.list(), original = current.spec,
+    { name = 'specs', label = 'Specs', key = 'spec',
+      items = lead_with(specs.list(), current.spec), original = current.spec,
       sep = '',
       cells = function(name)
         local ok, roles = pcall(specs.roles, name, foxglove.palette)
