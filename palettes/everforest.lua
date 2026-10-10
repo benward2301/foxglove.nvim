@@ -1,7 +1,7 @@
 return {
   name = 'everforest',
   base = '#2d353b',
-  subtext = '#859289',
+  subtext = '#56635f',
   text = '#d3c6aa',
   red = '#e67e80',
   green = '#a7c080',

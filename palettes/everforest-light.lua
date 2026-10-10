@@ -1,7 +1,7 @@
 return {
   name = 'everforest-light',
   base = '#fdf6e3',
-  subtext = '#939f91',
+  subtext = '#bdc3af',
   text = '#5c6a72',
   red = '#f85552',
   green = '#8da101',

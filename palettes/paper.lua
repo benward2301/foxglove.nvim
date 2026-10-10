@@ -9,5 +9,5 @@ return {
   blue = '#28536f',
   magenta = '#52456c',
   cyan = '#256b66',
-  orange = '#936019'
+  orange = '#885810'
 }

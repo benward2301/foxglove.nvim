@@ -7,7 +7,7 @@ return {
   green = '#859900',
   yellow = '#b58900',
   blue = '#268bd2',
-  magenta = '#d33682',
+  magenta = '#6c71c4',
   cyan = '#2aa198',
   orange = '#cb4b16',
 }

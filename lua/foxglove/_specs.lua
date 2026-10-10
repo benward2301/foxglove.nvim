@@ -7,7 +7,7 @@ local specs = require('foxglove._registry')('spec', function(spec)
   end
 end)
 
-specs.default = 'default'
+specs.default = 'nightfox'
 
 function specs.roles(name, palette)
   local spec = specs.resolve(name)
