@@ -193,10 +193,10 @@ function compose(target)
   local config = foxglove().config
 
   local raw = palettes.resolve(target.palette)
-  raw = hook('pre_derive', config.pre_derive, raw, raw)
+  raw = hook('pre_palette', config.pre_palette, raw, raw)
 
   local palette = derive(raw)
-  palette = hook('post_derive', config.post_derive, palette, palette)
+  palette = hook('post_palette', config.post_palette, palette, palette)
 
   local roles = specs.roles(target.spec, palette)
 
