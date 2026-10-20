@@ -1,6 +1,7 @@
 local hl
 
-local function build(palette, roles)
+local function build(palette, spec)
+  local roles = spec.roles
   return {
     ['SpecialKey'] = { link = 'NonText' },
     ['EndOfBuffer'] = { fg = palette.base1 },

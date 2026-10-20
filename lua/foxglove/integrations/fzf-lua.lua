@@ -1,6 +1,6 @@
-return function(palette, roles)
+return function(palette, spec)
   return {
-    FzfLuaFzfMatch = roles.overprint,
+    FzfLuaFzfMatch = spec.roles.overprint,
     FzfLuaBorder = { bg = palette.base1, fg = palette.base1 },
     FzfLuaBufNr = { fg = palette.orange1 },
     FzfLuaBufFlagCur = { fg = palette.red1 },

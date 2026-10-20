@@ -113,17 +113,18 @@ foxglove() {
 ]=]
 
 function generate()
-  local root = require('foxglove')
+  local theme = require('foxglove._theme')
   local tmtheme = require('foxglove._tmtheme')
-  local palette = root.palette or {}
-  local xml = tmtheme.build(palette, root.roles or {})
+  local palette = theme.palette or {}
+  local spec = theme.spec or {}
+  local xml = tmtheme.build(palette, spec)
 
   return (DISPATCH
     :gsub('@PALETTE@', function()
       return emit_cases(palette_entries(palette))
     end)
     :gsub('@ROLES@', function()
-      return emit_cases(role_entries(root.roles))
+      return emit_cases(role_entries(spec.roles))
     end)
     :gsub('@BOOL_ATTRS@', table.concat(BOOL_ATTRS, '|'))
     :gsub('@DARK@', palette.dark and '0' or '1')

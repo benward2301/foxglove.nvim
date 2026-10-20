@@ -11,13 +11,13 @@ local generation = 0
 
 local define_groups, run_integrations, reassert, set_terminal_colors
 
-function M.render(palette, roles, groups, touched, preview)
+function M.render(palette, spec, groups, touched, preview)
   touched = touched or {}
   local now = {}
   define_groups(groups, now)
   set_terminal_colors(palette)
 
-  run_integrations(palette, roles, now)
+  run_integrations(palette, spec, now)
   reassert(touched, groups, now)
 
   local stale = {}
@@ -37,7 +37,7 @@ function M.render(palette, roles, groups, touched, preview)
   local mine = generation
   vim.schedule(function()
     if mine == generation then
-      run_integrations(palette, roles, rendered)
+      run_integrations(palette, spec, rendered)
       reassert(standing.touched, standing.groups, rendered)
     end
   end)
@@ -88,14 +88,14 @@ function set_terminal_colors(palette)
   end
 end
 
-function run_integrations(palette, roles, sink)
+function run_integrations(palette, spec, sink)
   local names = {}
   for name in pairs(integrations) do
     names[#names + 1] = name
   end
   table.sort(names)
   for _, name in ipairs(names) do
-    local ok, groups = pcall(integrations[name], palette, roles)
+    local ok, groups = pcall(integrations[name], palette, spec)
     if not ok then
       vim.notify('foxglove: integration ' .. name .. ' failed: ' .. tostring(groups), vim.log.levels.WARN)
     elseif type(groups) == 'table' then

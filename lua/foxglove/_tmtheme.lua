@@ -3,9 +3,9 @@ local M = {}
 
 local GLOBALS, SCOPES, global_dict, scope_dict, font_style, kv, xml_escape
 
-function M.build(palette, roles)
+function M.build(palette, spec)
   palette = palette or {}
-  roles = roles or {}
+  local roles = spec and spec.roles or {}
   local out = {
     '<?xml version="1.0" encoding="UTF-8"?>\n',
     '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n',

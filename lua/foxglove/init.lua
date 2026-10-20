@@ -10,9 +10,6 @@ M.config = {}
 
 M.shell_script = vim.fn.stdpath('data') .. '/foxglove.sh'
 
-M.palette = nil
-M.roles = nil
-
 local half_name
 
 function M.setup(opts)
@@ -28,7 +25,15 @@ function M.setup(opts)
 end
 
 function M.highlight(group, fn)
-  theme.highlight(group, fn, M.palette, M.roles)
+  theme.highlight(group, fn)
+end
+
+function M.palette()
+  return vim.deepcopy(theme.palette)
+end
+
+function M.spec()
+  return vim.deepcopy(theme.spec)
 end
 
 function M.register_palette(palette)

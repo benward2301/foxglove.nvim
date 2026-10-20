@@ -2,10 +2,9 @@
 local palettes = require('foxglove._palettes')
 local specs = require('foxglove._specs')
 local state = require('foxglove._state')
-local derive = require('foxglove._derive')
+local derive = require('foxglove._derive').derive
 local build = require('foxglove._highlights')
 local hook = require('foxglove._hook')
-local merge = require('foxglove._roles').merge
 local editor = require('foxglove._editor')
 
 local M = {}
@@ -13,6 +12,10 @@ local M = {}
 M.SCHEME = 'foxglove'
 
 M.current = nil
+
+M.palette = nil
+
+M.spec = nil
 
 local DEFAULT = { palette = palettes.default, spec = specs.default }
 
@@ -46,9 +49,9 @@ function M.render(want)
   local composed = compose(target)
   local palette = render_composed(composed, preview)
   if not preview then
-    settle(target, composed)
+    settle(target)
   end
-  announce_render(composed)
+  announce_render(target)
   return palette
 end
 
@@ -73,15 +76,15 @@ function M.enter_colorscheme(want)
   vim.g.colors_name = M.SCHEME
 
   local palette = render_composed(composed)
-  settle(target, composed)
-  announce_render(composed)
+  settle(target)
+  announce_render(target)
   return palette
 end
 
-function M.highlight(group, fn, palette, roles)
+function M.highlight(group, fn)
   overrides[group] = fn
-  if fn and palette then
-    local hl = override_highlight(group, fn, palette, roles)
+  if fn and M.palette then
+    local hl = override_highlight(group, fn, M.palette, M.spec)
     if hl then
       editor.define_group(group, hl)
     end
@@ -121,7 +124,7 @@ function switch_through_colorscheme(want)
   if not ok then
     error(err, 0)
   end
-  return foxglove().palette
+  return M.palette
 end
 
 function as_foxglove_error(err)
@@ -139,33 +142,29 @@ local function overlay(groups, touched, extra)
   end
 end
 
-function override_highlight(group, fn, palette, roles)
-  local ok, hl = pcall(fn, palette, roles)
-  if not ok then
-    vim.notify(("foxglove: highlight '%s' failed: %s"):format(group, tostring(hl)), vim.log.levels.WARN)
-    return nil
-  end
-  if type(hl) ~= 'table' then
-    vim.notify(("foxglove: highlight '%s' wanted a highlight, got a %s"):format(group, type(hl)),
-      vim.log.levels.WARN)
-    return nil
-  end
-  return hl
+function override_highlight(group, fn, palette, spec)
+  return hook(("highlight '%s'"):format(group), fn, nil, palette, spec)
 end
 
-function overridden_highlights(palette, roles)
+function overridden_highlights(palette, spec)
   local out = {}
   for group, fn in pairs(overrides) do
-    out[group] = override_highlight(group, fn, palette, roles)
+    out[group] = override_highlight(group, fn, palette, spec)
   end
   return out
 end
 
-local function adjust_roles(name, fn, palette, roles)
-  return merge(roles, hook(name, fn, {}, palette, roles), function(role, got)
-    vim.notify(("foxglove: %s gave role '%s' a %s, wanted a highlight or a colour")
-      :format(name, role, got), vim.log.levels.WARN)
-  end)
+local function adjust_spec(name, fn, palette, spec)
+  local out = hook(name, fn, spec, palette, spec)
+  if out == spec then
+    return spec
+  end
+  if type(out.roles) ~= 'table' then
+    vim.notify(('foxglove: %s must return a spec with a roles table'):format(name), vim.log.levels.WARN)
+    return spec
+  end
+  out.roles = specs.normalize(name, out.roles)
+  return out
 end
 
 local function changed_groups(before, after)
@@ -198,30 +197,30 @@ function compose(target)
   local palette = derive(raw)
   palette = hook('post_palette', config.post_palette, palette, palette)
 
-  local roles = specs.roles(target.spec, palette)
+  local defined = specs.instantiate(target.spec, palette)
+  local spec = specs.complete(defined, palette)
 
   local plain
   if config.pre_render then
-    plain = build(palette, roles)
-    roles = adjust_roles('pre_render', config.pre_render, palette, roles)
+    plain = build(palette, spec)
+    spec = specs.complete(adjust_spec('pre_render', config.pre_render, palette, defined), palette)
   end
 
-  local groups = build(palette, roles)
+  local groups = build(palette, spec)
   local touched = plain and changed_groups(plain, groups) or {}
 
-  overlay(groups, touched, overridden_highlights(palette, roles))
+  overlay(groups, touched, overridden_highlights(palette, spec))
 
-  return { palette = palette, roles = roles, groups = groups, touched = touched }
+  return { palette = palette, spec = spec, groups = groups, touched = touched }
 end
 
 function render_composed(composed, preview)
-  local root = foxglove()
-  root.palette, root.roles = composed.palette, composed.roles
-  editor.render(composed.palette, composed.roles, composed.groups, composed.touched, preview)
+  M.palette, M.spec = composed.palette, composed.spec
+  editor.render(composed.palette, composed.spec, composed.groups, composed.touched, preview)
   return composed.palette
 end
 
-function settle(target, composed)
+function settle(target)
   local previous = M.current
   M.current = target
 
@@ -243,24 +242,23 @@ function settle(target, composed)
   end
 
   if not previous or previous.palette ~= target.palette or previous.spec ~= target.spec then
-    announce_theme_change(target, previous, composed)
+    announce_theme_change(target, previous)
   end
 end
 
-function announce_render(composed)
+function announce_render(target)
   vim.api.nvim_exec_autocmds('User', {
     pattern = 'FoxgloveRendered',
     modeline = false,
-    data = { palette = composed.palette, roles = composed.roles },
+    data = { theme = target },
   })
 end
 
-function announce_theme_change(target, previous, composed)
+function announce_theme_change(target, previous)
   vim.api.nvim_exec_autocmds('User', {
     pattern = 'FoxgloveThemeChanged',
     modeline = false,
-    data = { theme = target, previous = previous,
-      palette = composed.palette, roles = composed.roles },
+    data = { theme = target, previous = previous },
   })
 end
 

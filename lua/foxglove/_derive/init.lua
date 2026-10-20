@@ -94,4 +94,4 @@ function declared(raw)
   return out
 end
 
-return derive
+return { derive = derive, validate = validate_declared }

@@ -94,7 +94,7 @@ local function build_axes()
       items = lead_with(specs.list(), current.spec), original = current.spec,
       sep = '',
       cells = function(name)
-        local ok, roles = pcall(specs.roles, name, foxglove.palette)
+        local ok, roles = pcall(specs.roles, name, theme.palette)
         local out = {}
         for i, tok in ipairs(CODE) do
           local hl = ok and tok[2] and roles[tok[2]] or nil
@@ -259,7 +259,7 @@ function M.open()
 
   local function render_selection()
     vim.api.nvim_buf_clear_namespace(list, ns_sel, 0, -1)
-    local palette = foxglove.palette or {}
+    local palette = theme.palette or {}
     local bg_high = palette.base3
     local fg_high = palette.text0
     vim.api.nvim_set_hl(0, 'FoxglovePickerPrompt',

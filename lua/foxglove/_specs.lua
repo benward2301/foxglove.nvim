@@ -1,5 +1,4 @@
 local roles_lib = require('foxglove._roles')
-local merge = roles_lib.merge
 
 local specs = require('foxglove._registry')('spec', function(spec)
   if type(spec.roles) ~= 'function' then
@@ -9,20 +8,34 @@ end)
 
 specs.default = 'nightfox'
 
-function specs.roles(name, palette)
-  local spec = specs.resolve(name)
-  local out = merge({}, spec.roles(palette), function(role, got)
-    vim.notify(("foxglove: spec '%s' gave role '%s' a %s, wanted a highlight or a colour")
-      :format(spec.name, role, got), vim.log.levels.WARN)
+function specs.normalize(who, roles)
+  return roles_lib.normalize(roles, function(role, got)
+    vim.notify(("foxglove: %s gave role '%s' a %s, wanted a highlight or a colour")
+      :format(who, role, got), vim.log.levels.WARN)
   end)
-  if not out.include then out.include = out.preproc end
-  if not out.boolean then out.boolean = out.number end
-  if not out.decorator then out.decorator = out.constant end
-  if not out.func_call then out.func_call = out.func end
-  if not out.overprint then
-    out.overprint = { fg = palette.dark and palette.yellow0 or palette.orange0 }
+end
+
+function specs.instantiate(name, palette)
+  local spec = vim.deepcopy(specs.resolve(name))
+  spec.roles = specs.normalize(("spec '%s'"):format(spec.name), spec.roles(palette))
+  return spec
+end
+
+function specs.complete(spec, palette)
+  local roles = vim.tbl_extend('force', {}, spec.roles)
+  if not roles.include then roles.include = roles.preproc end
+  if not roles.boolean then roles.boolean = roles.number end
+  if not roles.decorator then roles.decorator = roles.constant end
+  if not roles.func_call then roles.func_call = roles.func end
+  if not roles.overprint then
+    roles.overprint = { fg = palette.dark and palette.yellow0 or palette.orange0 }
   end
-  return roles_lib.with_default(out, { bg = palette.base1, fg = palette.text1 })
+  roles = roles_lib.with_default(roles, { bg = palette.base1, fg = palette.text1 })
+  return vim.tbl_extend('force', spec, { roles = roles })
+end
+
+function specs.roles(name, palette)
+  return specs.complete(specs.instantiate(name, palette), palette).roles
 end
 
 return specs

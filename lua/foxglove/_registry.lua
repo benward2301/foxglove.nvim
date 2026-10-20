@@ -8,10 +8,15 @@ return function(kind, validate)
     if type(entry.name) ~= 'string' then
       error('foxglove: a ' .. kind .. ' must have a name', 0)
     end
-    if validate then
-      validate(entry)
+    local ok, copy = pcall(vim.deepcopy, entry)
+    if not ok then
+      error(("foxglove: %s '%s' can't be copied: %s")
+        :format(kind, entry.name, (tostring(copy):gsub('^.-:%d+: ', ''))), 0)
     end
-    entries[entry.name] = entry
+    if validate then
+      validate(copy)
+    end
+    entries[copy.name] = copy
   end
 
   function M.register(entry)
