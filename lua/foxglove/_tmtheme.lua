@@ -57,7 +57,7 @@ SCOPES = {
   { 'Keyword', 'keyword, keyword.other, storage, storage.type, storage.modifier', 'keyword' },
   { 'Function Keyword', 'storage.type.function, keyword.declaration.function', 'keyword' },
   { 'Builtin Type', 'support.type.builtin, storage.type.builtin, storage.type.primitive', 'type_builtin' },
-  { 'Type', 'entity.name.type, entity.name.class, entity.name.type.class, storage.type.class, support.type, support.class', 'type' },
+  { 'Type', 'entity.name.type, entity.name.class, entity.name.type.class, support.type, support.class', 'type' },
   { 'Inherited Class', 'entity.other.inherited-class', 'constructor' },
   { 'Namespace', 'entity.name.namespace, entity.name.module, support.module, support.type.package, variable.namespace', 'module' },
   { 'Label', 'entity.name.label', 'label' },

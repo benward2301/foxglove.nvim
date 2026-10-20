@@ -95,10 +95,10 @@ local function build(palette, spec)
     ['Define'] = { link = 'PreProc' },
     ['Macro'] = { link = 'PreProc' },
     ['PreCondit'] = { link = 'PreProc' },
-    ['StorageClass'] = { link = 'Type' },
+    ['StorageClass'] = { link = 'Keyword' },
     ['Type'] = hl(roles.type),
-    ['Structure'] = { link = 'Type' },
-    ['Typedef'] = { link = 'Type' },
+    ['Structure'] = { link = 'Keyword' },
+    ['Typedef'] = { link = 'Keyword' },
     ['Tag'] = hl(roles.reference),
     ['Special'] = hl(roles.special),
     ['SpecialChar'] = { link = 'Special' },
@@ -487,6 +487,7 @@ local function build(palette, spec)
     ['LazyDimmed'] = { link = 'LineNr' },
     ['LazyButtonActive'] = { link = 'TabLineSel' },
     ['typescriptParens'] = { fg = palette.text2 },
+    ['ktArrow'] = { link = 'Operator' },
   }
 end
 
