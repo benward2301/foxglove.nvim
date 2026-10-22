@@ -6,8 +6,8 @@ return {
   red = '#ea6962',
   green = '#a9b665',
   yellow = '#d8a657',
-  blue = '#89b482',
+  blue = '#7daea3',
   magenta = '#d3869b',
-  cyan = '#7daea3',
+  cyan = '#89b482',
   orange = '#e78a4e',
 }
