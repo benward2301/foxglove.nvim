@@ -1,6 +1,8 @@
 local cl = require('foxglove.colorlab')
 
 local VISIBLE_CHROMA = 0.035
+local LIGHTEN = 0.14
+local DARKEN = 0.11
 
 local function chroma_floor(hex)
   local c0 = cl.chroma(hex)
@@ -23,12 +25,18 @@ local function toward(hex, target, floor)
   return at(lo)
 end
 
-local function emphasis(hex, sign, step)
-  return toward(hex, cl.lightness(hex) + sign * step, chroma_floor(hex))
+local function shift(hex, sign)
+  local L = cl.lightness(hex)
+  return sign > 0 and LIGHTEN * (100 - L) or DARKEN * L
 end
 
-local function dim(hex, sign, step, limit)
+local function emphasis(hex, sign)
+  return toward(hex, cl.lightness(hex) + sign * shift(hex, sign), chroma_floor(hex))
+end
+
+local function dim(hex, sign, limit)
   local L0 = cl.lightness(hex)
+  local step = shift(hex, -sign)
   local bound = sign > 0 and math.min(limit, L0) or math.max(limit, L0)
   local target = sign > 0 and math.max(L0 - step, bound) or math.min(L0 + step, bound)
   return toward(hex, target, chroma_floor(hex))
@@ -41,11 +49,10 @@ end
 
 return function(raw, axis, name, base_lightness)
   local hex = raw[name]
-  local step = axis.reach / 4
   return {
-    [0] = emphasis(hex, axis.sign, step),
+    [0] = emphasis(hex, axis.sign),
     [1] = hex,
-    [2] = dim(hex, axis.sign, step, base_lightness[4]),
+    [2] = dim(hex, axis.sign, base_lightness[4]),
     [3] = tint(hex, raw.base, 0.30, (base_lightness[3] + base_lightness[4]) / 2),
     [4] = tint(hex, raw.base, 0.12, base_lightness[2]),
   }
