@@ -27,9 +27,7 @@ function specs.complete(spec, palette)
   if not roles.boolean then roles.boolean = roles.number end
   if not roles.decorator then roles.decorator = roles.constant end
   if not roles.func_call then roles.func_call = roles.func end
-  if not roles.overprint then
-    roles.overprint = { fg = palette.dark and palette.yellow0 or palette.orange0 }
-  end
+  if not roles.overprint then roles.overprint = { fg = palette.yellow0 } end
   roles = roles_lib.with_default(roles, { bg = palette.base1, fg = palette.text1 })
   return vim.tbl_extend('force', spec, { roles = roles })
 end
