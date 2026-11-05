@@ -1,11 +1,13 @@
 
 local M = {}
 
+local resolve = require('foxglove._groups').resolve
+
 local GLOBALS, SCOPES, global_dict, scope_dict, font_style, kv, xml_escape
 
-function M.build(palette, spec)
+function M.build(palette, groups)
   palette = palette or {}
-  local roles = spec and spec.roles or {}
+  groups = groups or {}
   local out = {
     '<?xml version="1.0" encoding="UTF-8"?>\n',
     '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n',
@@ -18,7 +20,7 @@ function M.build(palette, spec)
     global_dict(palette),
   }
   for _, row in ipairs(SCOPES) do
-    out[#out + 1] = scope_dict(row, roles, palette)
+    out[#out + 1] = scope_dict(row, groups, palette)
   end
   out[#out + 1] = '\t</array>\n'
   out[#out + 1] = '</dict>\n'
@@ -38,41 +40,41 @@ GLOBALS = {
 }
 
 SCOPES = {
-  { 'Comment', 'comment, punctuation.definition.comment', 'comment' },
-  { 'Punctuation', 'punctuation, punctuation.definition, punctuation.section, meta.brace', 'punctuation' },
-  { 'Separator', 'punctuation.separator, punctuation.terminator, punctuation.accessor', 'delimiter' },
-  { 'String', 'string, constant.other.symbol', 'string' },
-  { 'String Punctuation', 'punctuation.definition.string', 'string' },
-  { 'Escape', 'constant.character.escape, constant.character.escaped', 'string_escape', 'bold' },
-  { 'Regexp', 'string.regexp', 'string_regex' },
-  { 'Interpolation', 'punctuation.section.embedded, punctuation.section.interpolation, punctuation.definition.template-expression, variable.interpolation', 'punctuation_special' },
-  { 'Number', 'constant.numeric, keyword.other.unit', 'number' },
-  { 'Language Constant', 'constant.language', 'constant_builtin' },
-  { 'Constant', 'constant, constant.other, support.constant, variable.other.constant', 'constant' },
-  { 'Operator', 'keyword.operator', 'operator' },
-  { 'Word Operator', 'keyword.operator.word, keyword.operator.expression, keyword.operator.logical, keyword.operator.new', 'keyword_operator' },
-  { 'Return', 'keyword.control.return, keyword.control.flow.return', 'keyword_return' },
-  { 'Control Flow', 'keyword.control, keyword.control.conditional, keyword.control.loop, keyword.control.exception', 'conditional' },
-  { 'Preprocessor', 'meta.preprocessor, keyword.control.import, keyword.control.at-rule, keyword.other.preprocessor, punctuation.definition.preprocessor', 'preproc' },
-  { 'Keyword', 'keyword, keyword.other, storage, storage.type, storage.modifier', 'keyword' },
-  { 'Function Keyword', 'storage.type.function, keyword.declaration.function', 'keyword' },
-  { 'Builtin Type', 'support.type.builtin, storage.type.builtin, storage.type.primitive', 'type_builtin' },
-  { 'Type', 'entity.name.type, entity.name.class, entity.name.type.class, support.type, support.class', 'type' },
-  { 'Inherited Class', 'entity.other.inherited-class', 'constructor' },
-  { 'Namespace', 'entity.name.namespace, entity.name.module, support.module, support.type.package, variable.namespace', 'module' },
-  { 'Label', 'entity.name.label', 'label' },
-  { 'Builtin Function', 'support.function.builtin', 'func_builtin' },
-  { 'Macro', 'entity.name.function.macro, entity.name.function.preprocessor', 'func_macro' },
-  { 'Function', 'entity.name.function, support.function, variable.function', 'func' },
-  { 'Builtin Variable', 'variable.language, variable.other.builtin, support.variable', 'variable_builtin' },
-  { 'Parameter', 'variable.parameter', 'parameter' },
-  { 'Member', 'variable.other.member, variable.other.property, support.variable.property, entity.name.function.member', 'member' },
-  { 'Variable', 'variable, entity.name.variable', 'variable' },
-  { 'Tag', 'entity.name.tag, entity.other.attribute-name.class.css, entity.other.attribute-name.pseudo-class', 'tag' },
-  { 'Tag Delimiter', 'punctuation.definition.tag', 'tag_delimiter' },
-  { 'Attribute', 'entity.other.attribute-name', 'tag_attribute' },
-  { 'Attribute Id', 'entity.other.attribute-name.id, punctuation.definition.entity', 'reference' },
-  { 'Data Key', 'entity.name.tag.yaml, entity.name.tag.toml, support.type.property-name, meta.mapping.key string, meta.mapping.key punctuation.definition.string, meta.object-literal.key, meta.object-literal.key string, string.unquoted.label', 'member' },
+  { 'Comment', 'comment, punctuation.definition.comment', '@comment' },
+  { 'Punctuation', 'punctuation, punctuation.definition, punctuation.section, meta.brace', '@punctuation' },
+  { 'Separator', 'punctuation.separator, punctuation.terminator, punctuation.accessor', '@punctuation.delimiter' },
+  { 'String', 'string, constant.other.symbol', '@string' },
+  { 'String Punctuation', 'punctuation.definition.string', '@string' },
+  { 'Escape', 'constant.character.escape, constant.character.escaped', '@string.escape', 'bold' },
+  { 'Regexp', 'string.regexp', '@string.regexp' },
+  { 'Interpolation', 'punctuation.section.embedded, punctuation.section.interpolation, punctuation.definition.template-expression, variable.interpolation', '@punctuation.special' },
+  { 'Number', 'constant.numeric, keyword.other.unit', '@number' },
+  { 'Language Constant', 'constant.language', '@constant.builtin' },
+  { 'Constant', 'constant, constant.other, support.constant, variable.other.constant', '@constant' },
+  { 'Operator', 'keyword.operator', '@operator' },
+  { 'Word Operator', 'keyword.operator.word, keyword.operator.expression, keyword.operator.logical, keyword.operator.new', '@keyword.operator' },
+  { 'Return', 'keyword.control.return, keyword.control.flow.return', '@keyword.return' },
+  { 'Control Flow', 'keyword.control, keyword.control.conditional, keyword.control.loop, keyword.control.exception', '@keyword.conditional' },
+  { 'Preprocessor', 'meta.preprocessor, keyword.control.import, keyword.control.at-rule, keyword.other.preprocessor, punctuation.definition.preprocessor', '@keyword.directive' },
+  { 'Keyword', 'keyword, keyword.other, storage, storage.type, storage.modifier', '@keyword' },
+  { 'Function Keyword', 'storage.type.function, keyword.declaration.function', '@keyword' },
+  { 'Builtin Type', 'support.type.builtin, storage.type.builtin, storage.type.primitive', '@type.builtin' },
+  { 'Type', 'entity.name.type, entity.name.class, entity.name.type.class, support.type, support.class', '@type' },
+  { 'Inherited Class', 'entity.other.inherited-class', '@constructor' },
+  { 'Namespace', 'entity.name.namespace, entity.name.module, support.module, support.type.package, variable.namespace', '@module' },
+  { 'Label', 'entity.name.label', '@label' },
+  { 'Builtin Function', 'support.function.builtin', '@function.builtin' },
+  { 'Macro', 'entity.name.function.macro, entity.name.function.preprocessor', '@function.macro' },
+  { 'Function', 'entity.name.function, support.function, variable.function', '@function' },
+  { 'Builtin Variable', 'variable.language, variable.other.builtin, support.variable', '@variable.builtin' },
+  { 'Parameter', 'variable.parameter', '@variable.parameter' },
+  { 'Member', 'variable.other.member, variable.other.property, support.variable.property, entity.name.function.member', '@variable.member' },
+  { 'Variable', 'variable, entity.name.variable', '@variable' },
+  { 'Tag', 'entity.name.tag, entity.other.attribute-name.class.css, entity.other.attribute-name.pseudo-class', '@tag' },
+  { 'Tag Delimiter', 'punctuation.definition.tag', '@tag.delimiter' },
+  { 'Attribute', 'entity.other.attribute-name', '@tag.attribute' },
+  { 'Attribute Id', 'entity.other.attribute-name.id, punctuation.definition.entity', 'Tag' },
+  { 'Data Key', 'entity.name.tag.yaml, entity.name.tag.toml, support.type.property-name, meta.mapping.key string, meta.mapping.key punctuation.definition.string, meta.object-literal.key, meta.object-literal.key string, string.unquoted.label', '@variable.member' },
   { 'Heading', 'markup.heading, entity.name.section, markup.heading punctuation.definition.heading', 'cyan1', 'bold' },
   { 'Bold', 'markup.bold, punctuation.definition.bold', '', 'bold' },
   { 'Italic', 'markup.italic, punctuation.definition.italic', '', 'italic' },
@@ -80,17 +82,17 @@ SCOPES = {
   { 'Quote', 'markup.quote, punctuation.definition.quote.begin.markdown', 'text2' },
   { 'Inline Code', 'markup.raw.inline, markup.inline.raw', 'red1' },
   { 'Fenced Code', 'markup.raw.block, markup.fenced_code.block', 'red1' },
-  { 'Fence Punctuation', 'punctuation.definition.raw.markdown, punctuation.definition.fenced.markdown, variable.language.fenced.markdown', 'comment' },
+  { 'Fence Punctuation', 'punctuation.definition.raw.markdown, punctuation.definition.fenced.markdown, variable.language.fenced.markdown', '@comment' },
   { 'Link Text', 'string.other.link, punctuation.definition.string.begin.markdown, punctuation.definition.string.end.markdown', 'blue0' },
   { 'Link Url', 'markup.underline.link, markup.link.url', 'orange0', { 'italic', 'underline' } },
   { 'Math', 'markup.math, string.other.math', 'blue0' },
   { 'Diff Inserted', 'markup.inserted, punctuation.definition.inserted', 'green1' },
   { 'Diff Deleted', 'markup.deleted, punctuation.definition.deleted', 'red1' },
   { 'Diff Changed', 'markup.changed', 'blue1' },
-  { 'Diff Header', 'meta.diff.header, meta.diff.range', 'reference' },
+  { 'Diff Header', 'meta.diff.header, meta.diff.range', 'Tag' },
   { 'Deprecated', 'invalid.deprecated', 'yellow1' },
   { 'Invalid', 'invalid, invalid.illegal', 'red1' },
-  { 'Colour', 'constant.other.color, support.constant.color', 'special' },
+  { 'Colour', 'constant.other.color, support.constant.color', 'Special' },
 }
 
 function xml_escape(s)
@@ -102,10 +104,10 @@ function kv(indent, key, value)
     :format(indent, xml_escape(key), indent, xml_escape(value))
 end
 
-function font_style(role_hl, forced)
+function font_style(group_hl, forced)
   local out = {}
   local function on(key)
-    if role_hl and role_hl[key] == true then
+    if group_hl and group_hl[key] == true then
       return true
     end
     if type(forced) == 'table' then
@@ -137,10 +139,10 @@ function global_dict(palette)
   return table.concat(out)
 end
 
-function scope_dict(row, roles, palette)
-  local role_hl = rawget(roles, row[3])
-  local fg = (role_hl and role_hl.fg) or palette[row[3]]
-  local style = font_style(role_hl, row[4])
+function scope_dict(row, groups, palette)
+  local group_hl = resolve(groups, row[3])
+  local fg = (group_hl and group_hl.fg) or palette[row[3]]
+  local style = font_style(group_hl, row[4])
   if not fg and style == '' then
     return ''
   end

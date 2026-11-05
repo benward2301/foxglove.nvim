@@ -6,6 +6,8 @@ local cl = require('foxglove.colorlab')
 local palettes = require('foxglove._palettes')
 local specs = require('foxglove._specs')
 local theme = require('foxglove._theme')
+local build = require('foxglove._highlights')
+local groups_lib = require('foxglove._groups')
 
 local ns = vim.api.nvim_create_namespace('foxglove-pick')
 local ns_sel = vim.api.nvim_create_namespace('foxglove-pick-sel')
@@ -24,17 +26,17 @@ local MARK_BOTH = vim.fn.nr2char(0x25c9) -- ◉
 local SLOTS = { 'base', 'subtext', 'text', 'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'orange' }
 
 local CODE = {
-  { 'let', 'keyword' },
+  { 'let', '@keyword' },
   { ' v: ' },
-  { 'T', 'type' },
+  { 'T', '@type' },
   { ' ' },
-  { '=', 'operator' },
+  { '=', '@operator' },
   { ' ' },
-  { 'f', 'func' },
+  { 'f', '@function' },
   { '(' },
-  { '"a"', 'string' },
+  { '"a"', '@string' },
   { ', ' },
-  { '1', 'number' },
+  { '1', '@number' },
   { ')' },
 }
 
@@ -94,10 +96,12 @@ local function build_axes()
       items = lead_with(specs.list(), current.spec), original = current.spec,
       sep = '',
       cells = function(name)
-        local ok, roles = pcall(specs.roles, name, theme.palette)
+        local ok, groups = pcall(function()
+          return build(theme.palette, specs.instantiate(name, theme.palette))
+        end)
         local out = {}
         for i, tok in ipairs(CODE) do
-          local hl = ok and tok[2] and roles[tok[2]] or nil
+          local hl = ok and tok[2] and groups_lib.resolve(groups, tok[2]) or nil
           out[i] = { text = tok[1], attrs = hl and {
             fg = hl.fg and cl.hex(hl.fg) or nil,
             bg = hl.bg and cl.hex(hl.bg) or nil,

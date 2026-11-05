@@ -17,6 +17,8 @@ M.palette = nil
 
 M.spec = nil
 
+M.groups = nil
+
 local DEFAULT = { palette = palettes.default, spec = specs.default }
 
 local overrides = {}
@@ -25,7 +27,7 @@ local pending
 
 local carried_over, switch_through_colorscheme, as_foxglove_error, compose
 local render_composed, settle, announce_render, announce_theme_change
-local override_highlight, overridden_highlights
+local override_highlight, overridden_highlights, pre_render
 
 local function pick(want_half, from_half, default)
   return want_half or from_half or default
@@ -135,13 +137,6 @@ function as_foxglove_error(err)
   return (line:gsub('^.-foxglove: ', 'foxglove: '))
 end
 
-local function overlay(groups, touched, extra)
-  for group, attrs in pairs(extra) do
-    groups[group] = attrs
-    touched[group] = true
-  end
-end
-
 function override_highlight(group, fn, palette, spec)
   return hook(("highlight '%s'"):format(group), fn, nil, palette, spec)
 end
@@ -150,40 +145,6 @@ function overridden_highlights(palette, spec)
   local out = {}
   for group, fn in pairs(overrides) do
     out[group] = override_highlight(group, fn, palette, spec)
-  end
-  return out
-end
-
-local function adjust_spec(name, fn, palette, spec)
-  local out = hook(name, fn, spec, palette, spec)
-  if out == spec then
-    return spec
-  end
-  if type(out.roles) ~= 'table' then
-    vim.notify(('foxglove: %s must return a spec with a roles table'):format(name), vim.log.levels.WARN)
-    return spec
-  end
-  out.roles = specs.normalize(name, out.roles)
-  return out
-end
-
-local function changed_groups(before, after)
-  local out = {}
-  for group, hl in pairs(after) do
-    local was = before[group]
-    if type(was) ~= 'table' then
-      out[group] = true
-    else
-      for key, value in pairs(hl) do
-        if was[key] ~= value then out[group] = true end
-      end
-      for key in pairs(was) do
-        if hl[key] == nil then out[group] = true end
-      end
-    end
-  end
-  for group in pairs(before) do
-    if after[group] == nil then out[group] = true end
   end
   return out
 end
@@ -197,26 +158,33 @@ function compose(target)
   local palette = derive(raw)
   palette = hook('post_palette', config.post_palette, palette, palette)
 
-  local defined = specs.instantiate(target.spec, palette)
-  local spec = specs.complete(defined, palette)
+  local spec = specs.instantiate(target.spec, palette)
 
-  local plain
-  if config.pre_render then
-    plain = build(palette, spec)
-    spec = specs.complete(adjust_spec('pre_render', config.pre_render, palette, defined), palette)
+  return { palette = palette, spec = spec, groups = build(palette, spec) }
+end
+
+function pre_render(palette, spec)
+  local fn = foxglove().config.pre_render
+  if fn == nil then
+    return
   end
-
-  local groups = build(palette, spec)
-  local touched = plain and changed_groups(plain, groups) or {}
-
-  overlay(groups, touched, overridden_highlights(palette, spec))
-
-  return { palette = palette, spec = spec, groups = groups, touched = touched }
+  if type(fn) ~= 'function' then
+    vim.notify('foxglove: pre_render must be a function, got ' .. type(fn), vim.log.levels.WARN)
+    return
+  end
+  local ok, err = pcall(fn, vim.deepcopy(palette), vim.deepcopy(spec))
+  if not ok then
+    vim.notify('foxglove: pre_render failed: ' .. tostring(err), vim.log.levels.WARN)
+  end
 end
 
 function render_composed(composed, preview)
-  M.palette, M.spec = composed.palette, composed.spec
-  editor.render(composed.palette, composed.spec, composed.groups, composed.touched, preview)
+  M.palette, M.spec, M.groups = composed.palette, composed.spec, composed.groups
+  pre_render(composed.palette, composed.spec)
+  editor.render(composed.palette, composed.spec, composed.groups, preview)
+  for group, hl in pairs(overridden_highlights(composed.palette, composed.spec)) do
+    editor.define_group(group, hl)
+  end
   return composed.palette
 end
 

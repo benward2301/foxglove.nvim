@@ -11,14 +11,12 @@ local generation = 0
 
 local define_groups, run_integrations, reassert, set_terminal_colors
 
-function M.render(palette, spec, groups, touched, preview)
-  touched = touched or {}
+function M.render(palette, spec, groups, preview)
   local now = {}
   define_groups(groups, now)
   set_terminal_colors(palette)
 
   run_integrations(palette, spec, now)
-  reassert(touched, groups, now)
 
   local stale = {}
   for group in pairs(rendered) do
@@ -28,7 +26,7 @@ function M.render(palette, spec, groups, touched, preview)
   end
   define_groups(stale)
   rendered = now
-  standing = { groups = groups, touched = touched }
+  standing = { groups = vim.tbl_extend('force', {}, groups), touched = {} }
 
   generation = generation + 1
   if preview then

@@ -52,27 +52,6 @@ local function palette_entries(palette)
   return out
 end
 
-local function role_entries(roles)
-  local out = {}
-  for role, hl in pairs(roles or {}) do
-    if type(hl) == 'table' then
-      for attr, value in pairs(hl) do
-        if is_hex(value) then
-          out[role .. '.' .. attr] = value
-        elseif value == true then
-          out[role .. '.' .. attr] = 'true'
-        end
-      end
-    end
-  end
-  return out
-end
-
-local BOOL_ATTRS = {
-  'bold', 'italic', 'underline', 'undercurl', 'underdouble', 'underdotted',
-  'underdashed', 'strikethrough', 'reverse', 'standout', 'nocombine',
-}
-
 local DISPATCH = [=[
 foxglove() {
   case "${1:-}" in
@@ -83,21 +62,6 @@ foxglove() {
         *) printf "foxglove: no palette hue '%s'\n" "$2" >&2; return 1 ;;
       esac
       ;;
-    roles)
-      case "${2:-}" in
-        ?*.?*) ;;
-        *) printf 'usage: foxglove roles <role>.<key>\n' >&2; return 2 ;;
-      esac
-      case "$2" in
-@ROLES@
-        *)
-          case "${2##*.}" in
-            @BOOL_ATTRS@) printf 'false\n' ;;
-            *) return 1 ;;
-          esac
-          ;;
-      esac
-      ;;
     dark)
       return @DARK@
       ;;
@@ -105,7 +69,7 @@ foxglove() {
       printf '%s\n' @TMTHEME@
       ;;
     *)
-      printf 'usage: foxglove {palette <hue>|roles <role>.<key>|dark|tmtheme}\n' >&2
+      printf 'usage: foxglove {palette <hue>|dark|tmtheme}\n' >&2
       return 2
       ;;
   esac
@@ -116,17 +80,12 @@ function generate()
   local theme = require('foxglove._theme')
   local tmtheme = require('foxglove._tmtheme')
   local palette = theme.palette or {}
-  local spec = theme.spec or {}
-  local xml = tmtheme.build(palette, spec)
+  local xml = tmtheme.build(palette, theme.groups or {})
 
   return (DISPATCH
     :gsub('@PALETTE@', function()
       return emit_cases(palette_entries(palette))
     end)
-    :gsub('@ROLES@', function()
-      return emit_cases(role_entries(spec.roles))
-    end)
-    :gsub('@BOOL_ATTRS@', table.concat(BOOL_ATTRS, '|'))
     :gsub('@DARK@', palette.dark and '0' or '1')
     :gsub('@TMTHEME@', function() return quote(xml) end))
 end
