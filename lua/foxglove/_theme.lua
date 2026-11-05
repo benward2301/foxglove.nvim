@@ -19,6 +19,8 @@ M.spec = nil
 
 M.groups = nil
 
+M.resolved = nil
+
 local DEFAULT = { palette = palettes.default, spec = specs.default }
 
 local overrides = {}
@@ -182,9 +184,11 @@ function render_composed(composed, preview)
   M.palette, M.spec, M.groups = composed.palette, composed.spec, composed.groups
   pre_render(composed.palette, composed.spec)
   editor.render(composed.palette, composed.spec, composed.groups, preview)
-  for group, hl in pairs(overridden_highlights(composed.palette, composed.spec)) do
+  local overridden = overridden_highlights(composed.palette, composed.spec)
+  for group, hl in pairs(overridden) do
     editor.define_group(group, hl)
   end
+  M.resolved = vim.tbl_extend('force', {}, composed.groups, overridden)
   return composed.palette
 end
 

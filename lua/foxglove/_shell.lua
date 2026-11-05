@@ -52,6 +52,20 @@ local function palette_entries(palette)
   return out
 end
 
+local function highlight_entries(groups)
+  local groups_lib = require('foxglove._groups')
+  local out = {}
+  for name in pairs(groups or {}) do
+    local attrs = groups_lib.resolve(groups, name)
+    for attr, value in pairs(attrs or {}) do
+      if is_hex(value) then
+        out[name .. '.' .. attr] = value
+      end
+    end
+  end
+  return out
+end
+
 local DISPATCH = [=[
 foxglove() {
   case "${1:-}" in
@@ -62,6 +76,16 @@ foxglove() {
         *) printf "foxglove: no palette hue '%s'\n" "$2" >&2; return 1 ;;
       esac
       ;;
+    highlight)
+      case "${2:-}" in
+        ?*.?*) ;;
+        *) printf 'usage: foxglove highlight <Group>.<attr>\n' >&2; return 2 ;;
+      esac
+      case "$2" in
+@HIGHLIGHTS@
+        *) return 1 ;;
+      esac
+      ;;
     dark)
       return @DARK@
       ;;
@@ -69,7 +93,7 @@ foxglove() {
       printf '%s\n' @TMTHEME@
       ;;
     *)
-      printf 'usage: foxglove {palette <hue>|dark|tmtheme}\n' >&2
+      printf 'usage: foxglove {palette <hue>|highlight <Group>.<attr>|dark|tmtheme}\n' >&2
       return 2
       ;;
   esac
@@ -85,6 +109,9 @@ function generate()
   return (DISPATCH
     :gsub('@PALETTE@', function()
       return emit_cases(palette_entries(palette))
+    end)
+    :gsub('@HIGHLIGHTS@', function()
+      return emit_cases(highlight_entries(theme.resolved))
     end)
     :gsub('@DARK@', palette.dark and '0' or '1')
     :gsub('@TMTHEME@', function() return quote(xml) end))

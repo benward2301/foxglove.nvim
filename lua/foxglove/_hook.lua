@@ -15,6 +15,9 @@ return function(name, fn, fallback, ...)
   if not ok then
     return refuse('failed: ' .. tostring(result))
   end
+  if result == nil and fallback == nil then
+    return nil
+  end
   if type(result) ~= 'table' then
     return refuse('must return a table, got ' .. type(result))
   end
