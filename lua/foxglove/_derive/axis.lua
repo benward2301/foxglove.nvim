@@ -9,6 +9,7 @@ return function(raw)
   return {
     dark = dark,
     sign = sign,
+    span = span,
     reach = math.min(math.max(0.30 * span, 10), span),
   }
 end

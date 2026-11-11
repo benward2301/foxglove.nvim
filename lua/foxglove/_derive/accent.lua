@@ -30,8 +30,9 @@ local function shift(hex, sign)
   return sign > 0 and LIGHTEN * (100 - L) or DARKEN * L
 end
 
-local function emphasis(hex, sign)
-  return toward(hex, cl.lightness(hex) + sign * shift(hex, sign), chroma_floor(hex))
+local function emphasis(hex, sign, span)
+  local scale = math.min(1, span / 60)
+  return toward(hex, cl.lightness(hex) + sign * shift(hex, sign) * scale, chroma_floor(hex))
 end
 
 local function dim(hex, sign, limit)
@@ -50,7 +51,7 @@ end
 return function(raw, axis, name, base_lightness)
   local hex = raw[name]
   return {
-    [0] = emphasis(hex, axis.sign),
+    [0] = emphasis(hex, axis.sign, axis.span),
     [1] = hex,
     [2] = dim(hex, axis.sign, base_lightness[4]),
     [3] = tint(hex, raw.base, 0.30, (base_lightness[3] + base_lightness[4]) / 2),
